@@ -6,6 +6,7 @@
   --omarchy-accent: {{ accent }};
   --omarchy-surface: {{ color0 }};
   --omarchy-surface-bright: {{ color8 }};
+  --omarchy-dark-bg: {{ dark_background }};
 
   --zen-accent-color: var(--omarchy-accent) !important;
   --zen-border-color: var(--omarchy-surface) !important;
@@ -108,4 +109,9 @@ browser,
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
+}
+
+.zen-toast {
+  background: var(--omarchy-dark-bg) !important;
+  color: var(--omarchy-fg) !important;
 }
