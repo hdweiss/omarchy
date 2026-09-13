@@ -115,3 +115,8 @@ browser,
   background: var(--omarchy-dark-bg) !important;
   color: var(--omarchy-fg) !important;
 }
+
+.zen-glance-sidebar-container toolbarbutton {
+  background: var(--omarchy-dark-bg) !important;
+  color: var(--omarchy-fg) !important;
+}
