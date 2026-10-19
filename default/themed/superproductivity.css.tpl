@@ -42,6 +42,9 @@ body:not(.isDarkTheme) {
   --sp-fg-light: {{ light_foreground }};
   --sp-fg-bright: {{ bright_foreground }};
   --sp-fg-dark: {{ dark_foreground }};
+  --sp-ink-medium: rgba({{ foreground_rgb }}, 0.7);
+  --sp-ink-disabled: rgba({{ foreground_rgb }}, 0.38);
+  --sp-ink-faint: rgba({{ foreground_rgb }}, 0.12);
 
   /* Public theme contract */
   --surface-0: var(--sp-bg-dark);
@@ -256,6 +259,39 @@ html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
 }
 
 /*
+ * Text the app redeclares on `body.isDarkTheme` itself, which ties with the
+ * first block on specificity and wins on document order, so the dark-mode
+ * values show through: near-white sidenav labels (--sidenav-text is built from
+ * --text-color-less-intense, the active item from --ink-strong) and note text.
+ * On a light palette that is white on near-white. Same "Default theme only"
+ * scope as above, which is what lets these outrank the app without
+ * outranking a selected theme.
+ */
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
+  --ink: var(--sp-fg);
+  --ink-strong: var(--sp-fg-bright);
+  --ink-muted: var(--sp-fg-dark);
+  --ink-on-channel: {{ foreground_rgb }};
+
+  --text-color-less-intense: rgba({{ foreground_rgb }}, 0.87);
+  --text-color-more-intense: var(--sp-fg-light);
+  --standard-note-fg: var(--sp-fg);
+  --improvement-text: var(--sp-fg);
+  --improvement-button-text: var(--sp-bg);
+}
+
+/*
+ * The empty-day label gets a black halo in dark mode to lift it off the
+ * illustration behind it. Haloed in the background colour instead, it does
+ * the same job on a light palette rather than smudging the text.
+ */
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .no-tasks-label {
+  text-shadow:
+    0 0 2px var(--sp-bg),
+    0 0 5px var(--sp-bg);
+}
+
+/*
  * Angular Material's own component tokens, which the app hardcodes to grey 800
  * on a bare `.isDarkTheme` and which no bundled theme touches at all. They are
  * every surface that floats above the page: dialogs (schedule task, links &
@@ -268,10 +304,8 @@ html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
  * repaint every other theme's dialogs in this palette. Hence the same
  * "Default theme only" scope as the block above.
  *
- * Text and divider alphas are left as they are: white at low alpha reads
- * correctly on any dark surface. The tooltip and snack bar keep Material's
- * light container with dark text, which is a matched pair and breaks if only
- * one half is repainted.
+ * The tooltip and snack bar keep Material's light container with dark text,
+ * which is a matched pair and breaks if only one half is repainted.
  */
 html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
   /* The page itself */
@@ -318,6 +352,266 @@ html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
   --mat-table-row-item-outline-color: var(--separator);
   --mat-card-outlined-outline-color: var(--separator);
   --mat-button-toggle-divider-color: var(--separator);
+}
+
+/*
+ * Angular Material's text, icon and outline tokens, which the app hardcodes to
+ * white on `.isDarkTheme`. White reads on a dark palette, but a light Omarchy
+ * theme repaints the surfaces above near-white while Super Productivity's own
+ * dark mode is still on, leaving white text on them. These follow the
+ * palette's foreground instead, at Material's own alphas.
+ *
+ * Material redeclares some of them on component classes (`.mat-accent`,
+ * chips, radios, list options, tabs, the datepicker), which beats a value
+ * inherited from body, so those classes are repeated here. Selected and
+ * highlighted chips are left out: they sit on the accent and take its
+ * contrast colour. The FAB and slider sit on the accent too and are not
+ * touched. Same "Default theme only" scope as the blocks above, since no
+ * bundled theme sets these either.
+ */
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme {
+  --mat-app-text-color: var(--sp-fg);
+  --mat-badge-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-bottom-sheet-container-text-color: var(--sp-fg);
+  --mat-button-filled-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-button-filled-label-text-color: var(--sp-fg);
+  --mat-button-outlined-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-button-outlined-disabled-outline-color: var(--sp-ink-faint);
+  --mat-button-outlined-label-text-color: var(--sp-fg);
+  --mat-button-outlined-outline-color: var(--sp-ink-faint);
+  --mat-button-protected-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-button-protected-label-text-color: var(--sp-fg);
+  --mat-button-text-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-button-text-label-text-color: var(--sp-fg);
+  --mat-button-toggle-disabled-selected-state-text-color: var(--sp-ink-disabled);
+  --mat-button-toggle-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-button-toggle-legacy-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-button-toggle-legacy-selected-state-text-color: var(--sp-fg);
+  --mat-button-toggle-legacy-text-color: var(--sp-fg);
+  --mat-button-toggle-selected-state-text-color: var(--sp-fg);
+  --mat-button-toggle-text-color: var(--sp-fg);
+  --mat-button-tonal-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-button-tonal-label-text-color: var(--sp-fg);
+  --mat-card-subtitle-text-color: var(--sp-ink-medium);
+  --mat-checkbox-disabled-label-color: var(--sp-ink-disabled);
+  --mat-checkbox-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-label-text-color: var(--sp-fg);
+  --mat-checkbox-unselected-focus-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-hover-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-icon-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-body-label-text-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-container-text-color: var(--sp-fg);
+  --mat-datepicker-calendar-date-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-datepicker-calendar-date-preview-state-outline-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-date-text-color: var(--sp-fg);
+  --mat-datepicker-calendar-date-today-disabled-state-outline-color: var(--sp-ink-disabled);
+  --mat-datepicker-calendar-date-today-outline-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-header-text-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-period-button-icon-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-period-button-text-color: var(--sp-fg);
+  --mat-datepicker-range-input-disabled-state-separator-color: var(--sp-ink-disabled);
+  --mat-datepicker-range-input-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-datepicker-range-input-separator-color: var(--sp-fg);
+  --mat-datepicker-toggle-icon-color: var(--sp-ink-medium);
+  --mat-dialog-subhead-color: var(--sp-fg);
+  --mat-dialog-supporting-text-color: var(--sp-ink-medium);
+  --mat-expansion-container-text-color: var(--sp-fg);
+  --mat-expansion-header-description-color: var(--sp-ink-medium);
+  --mat-expansion-header-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-expansion-header-indicator-color: var(--sp-ink-medium);
+  --mat-expansion-header-text-color: var(--sp-fg);
+  --mat-form-field-disabled-select-arrow-color: var(--sp-ink-disabled);
+  --mat-form-field-enabled-select-arrow-color: var(--sp-ink-medium);
+  --mat-form-field-filled-active-indicator-color: var(--sp-ink-medium);
+  --mat-form-field-filled-disabled-active-indicator-color: var(--sp-ink-faint);
+  --mat-form-field-filled-disabled-input-text-color: var(--sp-ink-disabled);
+  --mat-form-field-filled-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-form-field-filled-hover-active-indicator-color: var(--sp-fg);
+  --mat-form-field-filled-hover-label-text-color: var(--sp-ink-medium);
+  --mat-form-field-filled-input-text-color: var(--sp-fg);
+  --mat-form-field-filled-label-text-color: var(--sp-ink-medium);
+  --mat-form-field-outlined-disabled-input-text-color: var(--sp-ink-disabled);
+  --mat-form-field-outlined-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-form-field-outlined-disabled-outline-color: var(--sp-ink-faint);
+  --mat-form-field-outlined-hover-label-text-color: var(--sp-fg);
+  --mat-form-field-outlined-hover-outline-color: var(--sp-fg);
+  --mat-form-field-outlined-input-text-color: var(--sp-fg);
+  --mat-form-field-outlined-label-text-color: var(--sp-ink-medium);
+  --mat-form-field-outlined-outline-color: rgba({{ foreground_rgb }}, .38);
+  --mat-icon-button-disabled-icon-color: var(--sp-ink-disabled);
+  --mat-list-list-item-disabled-label-text-color: var(--sp-fg);
+  --mat-list-list-item-disabled-leading-icon-color: var(--sp-fg);
+  --mat-list-list-item-disabled-trailing-icon-color: var(--sp-fg);
+  --mat-list-list-item-focus-label-text-color: var(--sp-fg);
+  --mat-list-list-item-hover-label-text-color: var(--sp-fg);
+  --mat-list-list-item-hover-leading-icon-color: var(--sp-ink-medium);
+  --mat-list-list-item-hover-trailing-icon-color: var(--sp-ink-medium);
+  --mat-list-list-item-label-text-color: var(--sp-fg);
+  --mat-list-list-item-leading-icon-color: var(--sp-ink-medium);
+  --mat-list-list-item-selected-trailing-icon-color: var(--sp-ink-medium);
+  --mat-list-list-item-supporting-text-color: var(--sp-ink-medium);
+  --mat-list-list-item-trailing-icon-color: var(--sp-ink-medium);
+  --mat-list-list-item-trailing-supporting-text-color: var(--sp-ink-medium);
+  --mat-menu-item-icon-color: var(--sp-fg);
+  --mat-menu-item-label-text-color: var(--sp-fg);
+  --mat-optgroup-label-text-color: var(--sp-fg);
+  --mat-option-label-text-color: var(--sp-fg);
+  --mat-paginator-container-text-color: var(--sp-fg);
+  --mat-paginator-disabled-icon-color: var(--sp-ink-disabled);
+  --mat-paginator-enabled-icon-color: var(--sp-ink-medium);
+  --mat-pseudo-checkbox-full-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-unselected-icon-color: var(--sp-ink-medium);
+  --mat-pseudo-checkbox-minimal-disabled-selected-checkmark-color: var(--sp-ink-disabled);
+  --mat-select-disabled-arrow-color: var(--sp-ink-disabled);
+  --mat-select-disabled-trigger-text-color: var(--sp-ink-disabled);
+  --mat-select-enabled-arrow-color: var(--sp-ink-medium);
+  --mat-select-enabled-trigger-text-color: var(--sp-fg);
+  --mat-select-placeholder-text-color: var(--sp-ink-medium);
+  --mat-sidenav-container-text-color: var(--sp-fg);
+  --mat-sidenav-content-text-color: var(--sp-fg);
+  --mat-slide-toggle-disabled-label-text-color: var(--sp-ink-disabled);
+  --mat-slide-toggle-label-text-color: var(--sp-fg);
+  --mat-sort-arrow-color: var(--sp-fg);
+  --mat-stepper-header-label-text-color: var(--sp-ink-medium);
+  --mat-stepper-header-optional-label-text-color: var(--sp-ink-medium);
+  --mat-stepper-header-selected-state-label-text-color: var(--sp-fg);
+  --mat-table-header-headline-color: var(--sp-fg);
+  --mat-table-row-item-label-text-color: var(--sp-fg);
+  --mat-toolbar-container-text-color: var(--sp-fg);
+  --mat-tree-node-text-color: var(--sp-fg);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-warn {
+  --mat-option-label-text-color: var(--sp-fg);
+  --mat-pseudo-checkbox-full-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-unselected-icon-color: var(--sp-ink-medium);
+  --mat-pseudo-checkbox-minimal-disabled-selected-checkmark-color: var(--sp-ink-disabled);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-primary {
+  --mat-pseudo-checkbox-full-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-pseudo-checkbox-full-unselected-icon-color: var(--sp-ink-medium);
+  --mat-pseudo-checkbox-minimal-disabled-selected-checkmark-color: var(--sp-ink-disabled);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-form-field.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-form-field.mat-warn {
+  --mat-select-disabled-arrow-color: var(--sp-ink-disabled);
+  --mat-select-disabled-trigger-text-color: var(--sp-ink-disabled);
+  --mat-select-enabled-arrow-color: var(--sp-ink-medium);
+  --mat-select-enabled-trigger-text-color: var(--sp-fg);
+  --mat-select-placeholder-text-color: var(--sp-ink-medium);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-standard-chip:not(.mat-mdc-chip-selected, .mat-mdc-chip-highlighted) {
+  --mat-chip-disabled-label-text-color: var(--sp-fg);
+  --mat-chip-label-text-color: var(--sp-fg);
+  --mat-chip-selected-disabled-trailing-icon-color: var(--sp-fg);
+  --mat-chip-selected-label-text-color: var(--sp-fg);
+  --mat-chip-selected-trailing-icon-color: var(--sp-fg);
+  --mat-chip-with-icon-disabled-icon-color: var(--sp-fg);
+  --mat-chip-with-icon-icon-color: var(--sp-fg);
+  --mat-chip-with-icon-selected-icon-color: var(--sp-fg);
+  --mat-chip-with-trailing-icon-disabled-trailing-icon-color: var(--sp-fg);
+  --mat-chip-with-trailing-icon-trailing-icon-color: var(--sp-fg);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-radio-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-radio-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-radio-button.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mdc-list-item__start,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mdc-list-item__end,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-accent .mdc-list-item__start,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-accent .mdc-list-item__end,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-warn .mdc-list-item__start,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-warn .mdc-list-item__end {
+  --mat-radio-disabled-label-color: var(--sp-ink-disabled);
+  --mat-radio-disabled-selected-icon-color: var(--sp-fg);
+  --mat-radio-disabled-unselected-icon-color: var(--sp-fg);
+  --mat-radio-label-text-color: var(--sp-fg);
+  --mat-radio-unselected-focus-icon-color: var(--sp-fg);
+  --mat-radio-unselected-hover-icon-color: var(--sp-fg);
+  --mat-radio-unselected-icon-color: var(--sp-ink-medium);
+  --mat-radio-unselected-pressed-icon-color: var(--sp-fg);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-list-option,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-list-option.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-list-option.mat-warn {
+  --mat-checkbox-disabled-label-color: var(--sp-ink-disabled);
+  --mat-checkbox-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-label-text-color: var(--sp-fg);
+  --mat-checkbox-unselected-focus-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-hover-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-icon-color: var(--sp-ink-medium);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-group,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-nav-bar,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-group.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-nav-bar.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-group.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-tab-nav-bar.mat-warn {
+  --mat-tab-inactive-focus-label-text-color: var(--sp-ink-medium);
+  --mat-tab-inactive-hover-label-text-color: var(--sp-ink-medium);
+  --mat-tab-inactive-label-text-color: var(--sp-ink-medium);
+  --mat-tab-pagination-icon-color: var(--sp-fg);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-checkbox.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-checkbox.mat-warn {
+  --mat-checkbox-disabled-selected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-disabled-unselected-icon-color: var(--sp-ink-disabled);
+  --mat-checkbox-unselected-focus-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-hover-icon-color: var(--sp-fg);
+  --mat-checkbox-unselected-icon-color: var(--sp-ink-medium);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-unelevated-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-raised-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-outlined-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-tonal-button.mat-primary,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-unelevated-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-raised-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-outlined-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-tonal-button.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-button.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-unelevated-button.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-raised-button.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-mdc-outlined-button.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-tonal-button.mat-warn {
+  --mat-button-outlined-outline-color: var(--sp-ink-faint);
+}
+
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-datepicker-content.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-datepicker-toggle-active.mat-accent,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-datepicker-content.mat-warn,
+html:not(:has(#custom-theme-stylesheet)) body.isDarkTheme .mat-datepicker-toggle-active.mat-warn {
+  --mat-datepicker-calendar-body-label-text-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-container-text-color: var(--sp-fg);
+  --mat-datepicker-calendar-date-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-datepicker-calendar-date-preview-state-outline-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-date-text-color: var(--sp-fg);
+  --mat-datepicker-calendar-date-today-disabled-state-outline-color: var(--sp-ink-disabled);
+  --mat-datepicker-calendar-date-today-outline-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-header-divider-color: var(--separator);
+  --mat-datepicker-calendar-header-text-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-period-button-icon-color: var(--sp-ink-medium);
+  --mat-datepicker-calendar-period-button-text-color: var(--sp-fg);
+  --mat-datepicker-range-input-disabled-state-separator-color: var(--sp-ink-disabled);
+  --mat-datepicker-range-input-disabled-state-text-color: var(--sp-ink-disabled);
+  --mat-datepicker-range-input-separator-color: var(--sp-fg);
+  --mat-datepicker-toggle-icon-color: var(--sp-ink-medium);
 }
 
 /*
